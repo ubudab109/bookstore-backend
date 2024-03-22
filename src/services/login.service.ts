@@ -25,7 +25,7 @@ export class LoginService {
         const processOrderCount = user.orders.filter(
           (order) => order.status === 'process',
         ).length;
-
+        user.orders = user.orders.filter((order) => order.status === 'process');
         // Add the process order count to the user object
         user.processOrderCount = processOrderCount;
       }

@@ -12,6 +12,8 @@ export class BookController {
   async findAll(
     @Res() res: Response,
     @Query('keyword') keyword?: string,
+    @Query('page') page: number = 1,
+    @Query('pageSize') pageSize: number = 10,
   ): Promise<void> {
     let title: string | undefined;
     let writer: string | undefined;
@@ -21,7 +23,7 @@ export class BookController {
       title = keyword;
       writer = keyword;
     }
-    const books = await this.bookService.findAll(title, writer);
+    const books = await this.bookService.findAll(title, writer, page, pageSize);
     const response: ApiResponse<Book[]> = {
       success: true,
       message: 'Data book successfully fetched',

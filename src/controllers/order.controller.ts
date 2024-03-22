@@ -73,7 +73,12 @@ export class OrderController {
     @Res() res: Response,
   ): Promise<void> {
     await this.orderService.cancelOrder(orderId);
-    res.status(204);
+    const response: ApiResponse<null> = {
+      success: true,
+      message: 'Data deleted successfully',
+      data: null,
+    };
+    res.status(200).json(response);
   }
 
   @Get('customer/:customerId')

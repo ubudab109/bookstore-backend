@@ -11,6 +11,17 @@ async function bootstrap() {
     app.useGlobalPipes(new ValidationPipe());
     await seederService.seedAll();
   }
-  await app.listen(process.env.NODE_PORT);
+  app.enableCors({
+    methods: ['GET', 'POST', 'DELETE', 'PUT'],
+    allowedHeaders: [
+      'Content-Type',
+      'Origin',
+      'X-Requested-With',
+      'Accept',
+      'Authorization',
+    ],
+    origin: true,
+  });
+  await app.listen(3000);
 }
 bootstrap();

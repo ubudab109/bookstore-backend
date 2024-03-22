@@ -30,7 +30,7 @@ export class LoginController {
       message:
         customer !== null
           ? 'Login Successfully'
-          : 'Unauthorized. Username or password wrong',
+          : ['Unauthorized. Username or password wrong'],
       data: customer,
     };
     res.status(customer !== null ? 201 : 401).json(response);

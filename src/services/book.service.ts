@@ -10,7 +10,12 @@ export class BookService {
     private readonly bookRepository: Repository<Book>,
   ) {}
 
-  async findAll(title?: string, writer?: string): Promise<Book[]> {
+  async findAll(
+    title?: string,
+    writer?: string,
+    page = 1,
+    pageSize = 10,
+  ): Promise<Book[]> {
     let query = this.bookRepository.createQueryBuilder('book');
 
     // Add conditions for title and writer if provided
@@ -23,6 +28,7 @@ export class BookService {
       });
     }
 
+    query = query.skip((page - 1) * pageSize).take(pageSize);
     return query.getMany();
   }
 }

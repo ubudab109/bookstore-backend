@@ -32,6 +32,7 @@ export class OrderService {
         customer: {
           id: customerId,
         },
+        status: OrderStatus.PROCESS
       });
       let order: Order;
       if (existingOrder === null) {
