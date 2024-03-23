@@ -96,8 +96,8 @@ export class OrderService {
           const customer = await entityManager.findOne(Customer, {
             where: { id: customerId },
           });
-          if (customer.points <= order.total) {
-            const newPoints = customer.points - order.total;
+          const newPoints = customer.points - order.total;
+          if (newPoints <= order.total) {
             await entityManager.update(Customer, customerId, {
               points: newPoints,
             });
