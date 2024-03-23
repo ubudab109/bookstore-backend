@@ -32,7 +32,7 @@ export class OrderService {
         customer: {
           id: customerId,
         },
-        status: OrderStatus.PROCESS
+        status: OrderStatus.PROCESS,
       });
       let order: Order;
       if (existingOrder === null) {
@@ -82,7 +82,7 @@ export class OrderService {
     });
   }
 
-  async payOrders(customerId: number, orderIds: number[]): Promise<void> {
+  async payOrders(customerId: number, orderIds: number[]): Promise<boolean> {
     return this.entityManager.transaction(async (entityManager) => {
       for (const orderId of orderIds) {
         const order = await entityManager.findOneBy(Order, {
@@ -96,12 +96,17 @@ export class OrderService {
           const customer = await entityManager.findOne(Customer, {
             where: { id: customerId },
           });
-          const newPoints = customer.points - order.total;
-          await entityManager.update(Customer, customerId, {
-            points: newPoints,
-          });
-          order.status = OrderStatus.PAID;
-          await entityManager.save(order);
+          if (customer.points <= order.total) {
+            const newPoints = customer.points - order.total;
+            await entityManager.update(Customer, customerId, {
+              points: newPoints,
+            });
+            order.status = OrderStatus.PAID;
+            await entityManager.save(order);
+            return true;
+          } else {
+            return false;
+          }
         }
       }
     });

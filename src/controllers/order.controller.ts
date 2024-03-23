@@ -103,12 +103,23 @@ export class OrderController {
   ): Promise<void> {
     let response: ApiResponse<null>;
     try {
-      await this.orderService.payOrders(customerId, orderIds.orderIds);
-      response = {
-        success: true,
-        message: 'Order paid successfully',
-        data: null,
-      };
+      const order = await this.orderService.payOrders(
+        customerId,
+        orderIds.orderIds,
+      );
+      if (order) {
+        response = {
+          success: true,
+          message: 'Order paid successfully',
+          data: null,
+        };
+      } else {
+        response = {
+          success: true,
+          message: 'Your points is less than total',
+          data: null,
+        };
+      }
       res.status(201).json(response);
     } catch (error) {
       console.log(error);
