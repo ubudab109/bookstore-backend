@@ -110,7 +110,6 @@ export class OrderService {
         });
 
         if (order) {
-          console.log('order total ' + order.total);
           totalPointsToDeduct += order.total;
         }
       }
