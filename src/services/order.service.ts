@@ -121,11 +121,9 @@ export class OrderService {
       });
 
       if (!customer) {
-        console.log('Customer not found');
         return false;
       }
 
-      console.log('total deduc ' + totalPointsToDeduct);
       // Check if customer has enough points
       if (customer.points >= totalPointsToDeduct) {
         // Deduct points and mark orders as paid
@@ -142,10 +140,8 @@ export class OrderService {
             await entityManager.save(order);
           }
         }
-
         return true;
       } else {
-        console.log('Insufficient points');
         return false;
       }
     });
