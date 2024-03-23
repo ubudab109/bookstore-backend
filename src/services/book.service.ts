@@ -13,6 +13,7 @@ export class BookService {
   async findAll(
     title?: string,
     writer?: string,
+    tags?: string[],
     page = 1,
     pageSize = 10,
   ): Promise<Book[]> {
@@ -25,6 +26,13 @@ export class BookService {
     if (writer) {
       query = query.orWhere('book.writer LIKE :writer', {
         writer: `%${writer}%`,
+      });
+    }
+
+    if (tags && tags.length > 0) {
+      const joinedTags: string = tags.join(',');
+      query = query.orWhere(`book.tags LIKE :tags`, {
+        tags: joinedTags,
       });
     }
 
