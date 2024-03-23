@@ -115,7 +115,7 @@ export class OrderController {
         };
       } else {
         response = {
-          success: true,
+          success: false,
           message: 'Your points is less than total',
           data: null,
         };
