@@ -4,6 +4,7 @@ import {
   Column,
   ManyToMany,
   JoinTable,
+  OneToMany,
 } from 'typeorm';
 import { Order } from './order.entity';
 
@@ -27,7 +28,7 @@ export class Book {
   @Column('simple-array')
   tags: string[];
 
-  @ManyToMany(() => Order, (order) => order.book)
+  @OneToMany(() => Order, (order) => order.book)
   @JoinTable()
   orders: Order[];
 }

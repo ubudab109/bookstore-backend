@@ -57,12 +57,25 @@ export class OrderService {
   }
 
   async editOrder(orderId: number, quantity: number): Promise<Order | null> {
-    const order = await this.orderRepository.findOneBy({ id: orderId });
+    const order = await this.orderRepository.findOne({
+      where: {
+        id: orderId,
+      },
+      relations: ['book'],
+    });
     if (order == null) {
       return null;
     } else {
-      order.quantity = quantity;
-      return this.orderRepository.save(order);
+      const book = await this.entityManager.findOne(Book, {
+        where: { id: order.book.id },
+      });
+      if (book) {
+        order.quantity = quantity;
+        order.total = book.price * quantity;
+        return this.orderRepository.save(order);
+      } else {
+        return null;
+      }
     }
   }
 
@@ -84,30 +97,56 @@ export class OrderService {
 
   async payOrders(customerId: number, orderIds: number[]): Promise<boolean> {
     return this.entityManager.transaction(async (entityManager) => {
+      let totalPointsToDeduct = 0;
+
+      // Calculate total points to deduct
       for (const orderId of orderIds) {
-        const order = await entityManager.findOneBy(Order, {
-          id: orderId,
-          status: OrderStatus.PROCESS,
-          customer: {
-            id: customerId,
+        const order = await entityManager.findOne(Order, {
+          where: {
+            id: orderId,
+            status: OrderStatus.PROCESS,
+            customer: { id: customerId },
           },
         });
+
         if (order) {
-          const customer = await entityManager.findOne(Customer, {
-            where: { id: customerId },
+          console.log('order total ' + order.total);
+          totalPointsToDeduct += order.total;
+        }
+      }
+
+      // Fetch customer
+      const customer = await entityManager.findOne(Customer, {
+        where: { id: customerId },
+      });
+
+      if (!customer) {
+        console.log('Customer not found');
+        return false;
+      }
+
+      console.log('total deduc ' + totalPointsToDeduct);
+      // Check if customer has enough points
+      if (customer.points >= totalPointsToDeduct) {
+        // Deduct points and mark orders as paid
+        customer.points -= totalPointsToDeduct;
+        await entityManager.save(customer);
+
+        for (const orderId of orderIds) {
+          const order = await entityManager.findOne(Order, {
+            where: { id: orderId },
           });
-          const newPoints = customer.points - order.total;
-          if (newPoints <= order.total) {
-            await entityManager.update(Customer, customerId, {
-              points: newPoints,
-            });
+
+          if (order) {
             order.status = OrderStatus.PAID;
             await entityManager.save(order);
-            return true;
-          } else {
-            return false;
           }
         }
+
+        return true;
+      } else {
+        console.log('Insufficient points');
+        return false;
       }
     });
   }
